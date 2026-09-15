@@ -1,3 +1,4 @@
 pandas
-streamlit # for simple web dev w/o needing frontend dev
-plotly/matplot/seaborn
+streamlit
+plotly
+
