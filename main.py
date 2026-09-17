@@ -19,3 +19,15 @@ st.sidebar.header('Dashboard Filters')
 content_type = st.sidebar.multiselect(label='Content Type', options=df['type'].dropna().unique(), default=df['type'].dropna().unique())
 country = st.sidebar.multiselect(label='Country', options=df['country'].str.split(',').explode().replace('',np.nan).dropna().str.strip()
                                  .sort_values().unique())
+rating = st.sidebar.multiselect(label='Rating', options=df['rating'].dropna().sort_values().unique())
+relyear = st.sidebar.slider(label='Release Year', min_value=df['release_year'].min(), max_value=df['release_year'].max(), value=(2000,2020))
+
+#filtering data
+fil_df = df[df['type'].isin(content_type)]
+if country:
+    fil_df = fil_df[fil_df['country'].apply(lambda x: any(c.strip() in country for c in x.split(',')))]
+if rating:
+    fil_df = fil_df[fil_df['rating'].isin(rating)]
+if relyear:
+    fil_df = fil_df[(fil_df['release_year'] >= relyear[0]) & (fil_df['release_year'] <= relyear[1])]
+
