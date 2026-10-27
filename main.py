@@ -20,7 +20,7 @@ content_type = st.sidebar.multiselect(label='Content Type', options=df['type'].d
 country = st.sidebar.multiselect(label='Country', options=df['country'].str.split(',').explode().replace('',np.nan).dropna().str.strip()
                                  .sort_values().unique())
 rating = st.sidebar.multiselect(label='Rating', options=df['rating'].dropna().sort_values().unique())
-relyear = st.sidebar.slider(label='Release Year', min_value=df['release_year'].min(), max_value=df['release_year'].max(), value=(2000,2020))
+relyear = st.sidebar.slider(label='Release Year', min_value=df['release_year'].min(), max_value=df['release_year'].max(), value=(1925,2020))
 
 #filtering data
 fil_df = df[df['type'].isin(content_type)]
@@ -57,3 +57,45 @@ with col2:
     fig = px.line(data, x= data.index, y=data.values, markers=True)
     fig.update_layout(xaxis_title='Years',yaxis_title='Titles')
     st.plotly_chart(fig, width='stretch')
+
+st.divider()
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader('Top countries producing content')
+    data = fil_df['country'].str.split(',').explode().str.strip().value_counts().head(10)
+    fig = px.bar(data, x=data.values, y= data.index, color=data.values,color_continuous_scale='haline', orientation='h')
+    fig.update_xaxes(title_text='Count')
+    fig.update_yaxes(title_text='Country')
+    st.plotly_chart(fig, width='stretch')
+
+with col2:
+    st.subheader('Rating Distribution')
+    data = fil_df['rating'].value_counts()
+    fig = px.bar(data, x=data.index, y=data.values,color=data.values,color_continuous_scale='Viridis')
+    fig.update_xaxes(title_text='Rating')
+    fig.update_yaxes(title_text='Count')
+    st.plotly_chart(fig, width='stretch')
+
+st.divider()
+st.subheader('Top Genres')
+genres = fil_df['listed_in'].str.split(',').explode()
+data = genres.value_counts().head(10)
+fig = px.bar(data, x=data.index, y=data.values,color=data.values,color_continuous_scale='rainbow')
+fig.update_xaxes(title_text='Genres')
+fig.update_yaxes(title_text='Count')
+st.plotly_chart(fig, width='stretch')
+
+st.divider()
+st.subheader('Global Distribution')
+data = fil_df['country'].str.split(',').explode().str.strip().value_counts()
+data = data.reset_index()
+data.columns = ['country','count']
+fig = px.choropleth(data, locations='country', locationmode='country names', color='count', color_continuous_scale='spectral')
+st.plotly_chart(fig)
+
+st.divider()
+st.subheader('Dataset Review')
+txtsrc = st.text_input('Enter Title to Search')
+if txtsrc:
+    data=fil_df[fil_df['title'].str.contains(txtsrc, case=False)]
+    st.write(data)
